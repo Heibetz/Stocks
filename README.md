@@ -25,11 +25,9 @@ A simple and fun stock portfolio tracker app built with **Flutter**, using **Fir
 
 - Flutter SDK installed
 - Firebase project set up
-- (For these next ones there is not setup, you can use mine)
 - OpenAI API Key
-- Finnhub API Key
 
-I am not protecting my API keys, so you can use mine.
+- You can use my Finnhub API Key.
 
 ### Setup Instructions
 
