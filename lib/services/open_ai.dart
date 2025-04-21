@@ -1,9 +1,8 @@
 import 'package:dart_openai/dart_openai.dart';
 import 'package:flutter/foundation.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'finnhub_service.dart';
-
-const String _apiKey = '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';
 
 class OpenAIService {
   static final OpenAIService _instance = OpenAIService._internal();
@@ -13,7 +12,10 @@ class OpenAIService {
   final requestMessages = <OpenAIChatCompletionChoiceMessageModel>[];
 
   OpenAIService._internal() {
-    OpenAI.apiKey = _apiKey;
+    // Access the API key (dotenv is loaded in main.dart)
+    String apiKey = dotenv.env['openai_api_key'] ?? '';
+
+    OpenAI.apiKey = apiKey;
 
     final systemMessage = OpenAIChatCompletionChoiceMessageModel(
       content: [
