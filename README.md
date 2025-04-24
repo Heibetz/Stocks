@@ -35,4 +35,11 @@ A simple and fun stock portfolio tracker app built with **Flutter**, using **Fir
    ```bash
    git clone https://github.com/your-username/stocks-tracker-app.git
    cd stocks-tracker-app
+   flutter pub get
+
+2. **Create a .env file:**
+   OPENAI_API_KEY=your_openai_api_key_here
+
+3. **Run the App**
+   in the terminal:
    flutter run
