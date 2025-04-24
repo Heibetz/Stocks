@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../services/finnhub_service.dart';
-import '../services/firestore_services.dart';
+import '../controllers/task_controller.dart';
 
 class SellStockPage extends StatefulWidget {
   final String userId;
@@ -21,9 +21,8 @@ class _SellStockPageState extends State<SellStockPage> {
   void initState() {
     super.initState();
     final finnhubService = FinnhubService();
-    final firestoreService = FirestoreService();
     stockData = finnhubService.getStockQuote(widget.stockName);
-    sharesOwned = firestoreService.getUserData(widget.userId).then((snapshot) {
+    sharesOwned = TaskController().getUserData(widget.userId).then((snapshot) {
       final data = snapshot.data() as Map<String, dynamic>;
       final stock = data['stocks_bought']?.firstWhere(
         (s) => s['name'] == widget.stockName,
@@ -133,8 +132,7 @@ class _SellStockPageState extends State<SellStockPage> {
                     final pricePerShare = stockDataMap['c'] ?? 0.0;
                     final totalValue = pricePerShare * sharesToSell;
 
-                    final firestoreService = FirestoreService();
-                    final userDataSnapshot = await firestoreService.getUserData(widget.userId);
+                    final userDataSnapshot = await TaskController().getUserData(widget.userId);
                     final userData = userDataSnapshot.data() as Map<String, dynamic>;
                     final stocksBought = userData['stocks_bought'] ?? [];
                     final updatedStocks = stocksBought.map((stock) {
@@ -146,7 +144,7 @@ class _SellStockPageState extends State<SellStockPage> {
 
                     final newUnusedMoney = (userData['unused_money'] ?? 0) + totalValue;
 
-                    await firestoreService.updateUserStocksAndMoney(widget.userId, updatedStocks, newUnusedMoney);
+                    await TaskController().updateUserStocksAndMoney(widget.userId, updatedStocks, newUnusedMoney);
 
                     Navigator.of(context).pop(true);
                   },

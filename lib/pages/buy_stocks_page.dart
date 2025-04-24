@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import '../services/firestore_services.dart';
-
+import '../controllers/task_controller.dart';
 
 class BuyStocksPage extends StatefulWidget {
   final String symbol;
@@ -51,7 +50,6 @@ class _BuyStocksPageState extends State<BuyStocksPage> {
                 ),
                 ElevatedButton(
                   onPressed: () async {
-                    final firestoreService = FirestoreService();
                     final userId = widget.userId;
                     final sharesText = _sharesController.text.trim();
                     int? sharesToBuy = int.tryParse(sharesText);
@@ -61,7 +59,7 @@ class _BuyStocksPageState extends State<BuyStocksPage> {
                       );
                       return;
                     }
-                    final doc = await firestoreService.getUserData(userId);
+                    final doc = await TaskController().getUserData(userId);
                     final userData = doc.data() as Map<String, dynamic>;
                     double unusedMoney = (userData['unused_money'] ?? 0).toDouble();
                     final double stockPrice = double.tryParse(widget.currentPrice) ?? 0;
@@ -86,7 +84,7 @@ class _BuyStocksPageState extends State<BuyStocksPage> {
                       stocksBought.add({'name': widget.symbol, 'shares_bought': sharesToBuy});
                     }
                     double newUnusedMoney = unusedMoney - totalCost;
-                    await firestoreService.updateUserStocksAndMoney(userId, stocksBought, newUnusedMoney);
+                    TaskController().updateUserStocksAndMoney(userId, stocksBought, newUnusedMoney);
                     Navigator.of(context).pop(true);
                   },
                   child: Text('Buy'),

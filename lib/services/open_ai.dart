@@ -1,7 +1,8 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dart_openai/dart_openai.dart';
 import 'package:flutter/foundation.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:stocks/controllers/task_controller.dart';
 import 'finnhub_service.dart';
 
 class OpenAIService {
@@ -73,7 +74,7 @@ class OpenAIService {
   Future<void> fetchPortfolioData(String userId) async {
     try {
       // Fetch the user's portfolio data from Firestore
-      final userDoc = await FirebaseFirestore.instance.collection('users').doc(userId).get();
+      final userDoc = await TaskController().getUserData(userId);
       if (userDoc.exists) {
         final userData = userDoc.data() as Map<String, dynamic>;
         final stocksBought = userData['stocks_bought'] ?? [];
@@ -124,10 +125,10 @@ class OpenAIService {
 
   Future<void> _buyStock(String userId, String stockName, int quantity) async {
     try {
-      final userDocRef = FirebaseFirestore.instance.collection('users').doc(userId);
+      final userDocRef = TaskController().getUserData(userId);
 
       await FirebaseFirestore.instance.runTransaction((transaction) async {
-        final userDoc = await transaction.get(userDocRef);
+        final userDoc = await userDocRef;
 
         if (userDoc.exists) {
           final userData = userDoc.data() as Map<String, dynamic>;
@@ -151,10 +152,7 @@ class OpenAIService {
             }
 
             // Update Firestore with new stock data and balance
-            transaction.update(userDocRef, {
-              'stocks_bought': stocksBought,
-              'unused_money': unusedMoney - totalCost
-            });
+            await TaskController().updateUserStocksAndMoney(userId, stocksBought, unusedMoney - totalCost);
             _addMessage(message: "Bought ${quantity.toString()} stocks of ${stockName} at \$$stockPrice each. Total cost: \$$totalCost.", isFromUser: false);
           } else {
             _addMessage(message: "Insufficient funds to buy ${quantity.toString()} stocks of ${stockName}.", isFromUser: false);
@@ -170,10 +168,10 @@ class OpenAIService {
 
   Future<void> _sellStock(String userId, String stockName, int quantity) async {
     try {
-      final userDocRef = FirebaseFirestore.instance.collection('users').doc(userId);
+      final userDocRef = TaskController().getUserData(userId);
 
       await FirebaseFirestore.instance.runTransaction((transaction) async {
-        final userDoc = await transaction.get(userDocRef);
+        final userDoc = await userDocRef;
 
         if (userDoc.exists) {
           final userData = userDoc.data() as Map<String, dynamic>;
@@ -196,10 +194,7 @@ class OpenAIService {
                 stocksBought.removeAt(stockIndex); // Remove stock if no shares left
               }
               // Update Firestore with new stock data and balance
-              transaction.update(userDocRef, {
-                'stocks_bought': stocksBought,
-                'unused_money': unusedMoney + totalRevenue
-              });
+              await TaskController().updateUserStocksAndMoney(userId, stocksBought, unusedMoney + totalRevenue);
               _addMessage(message: "Sold ${quantity.toString()} stocks of ${stockName} at \$$stockPrice each. Total revenue: \$$totalRevenue.", isFromUser: false);
             } else {
               _addMessage(message: "Not enough shares to sell.", isFromUser: false);

@@ -1,8 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import '../services/firestore_services.dart';
 import '../services/finnhub_service.dart';
 import 'buy_stocks_page.dart';
+import '../controllers/task_controller.dart';
 
 class BuySellPage extends StatefulWidget {
   final String userId;
@@ -13,7 +13,6 @@ class BuySellPage extends StatefulWidget {
 }
 
 class _BuySellPageState extends State<BuySellPage> {
-  final firestoreService = FirestoreService();
   final finnhubService = FinnhubService();
   final List<String> featuredStocks = ['AAPL', 'TSLA', 'AMD', 'GOOGL', 'MSFT'];
   final TextEditingController _searchController = TextEditingController();
@@ -93,7 +92,7 @@ class _BuySellPageState extends State<BuySellPage> {
         Expanded(
           child: FutureBuilder(
             future: Future.wait([
-              firestoreService.getUserData(widget.userId),
+              TaskController().getUserData(widget.userId),
               Future.wait(featuredStocks.map((symbol) => finnhubService.getStockQuote(symbol))),
             ]),
             builder: (context, snapshot) {

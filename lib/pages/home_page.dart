@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../services/firestore_services.dart';
+import '../controllers/task_controller.dart';
 import '../services/finnhub_service.dart';
 import 'sell_stock_page.dart';
 
@@ -12,14 +12,13 @@ class Page1 extends StatefulWidget {
 }
 
 class _Page1State extends State<Page1> {
-  final firestoreService = FirestoreService();
   final finnhubService = FinnhubService();
   double? totalMoney;
 
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
-      future: firestoreService.getUserData(widget.userId),
+      future: TaskController().getUserData(widget.userId),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return Center(child: CircularProgressIndicator());
